@@ -5,7 +5,8 @@ import pyglet
 from pyglet.gl import *
 from pyglet.window import key, mouse
 
-resources = {}
+win = pyglet.window.Window()
+win.resources = {}
 
 
 def set_vertex_array(vs):
@@ -16,85 +17,87 @@ def set_vertex_array(vs):
 
 def on_draw_0():
 
-    resources['window'].clear()
-    resources['image'].blit(0, 0)
-    resources['label'].draw()
+    win.clear()
+    win.resources['image'].blit(0, 0)
+    win.resources['label'].draw()
 
 
 def on_draw_1():
 
-    # TODO: label here
-
-    w = resources['window']
     glClear(GL_COLOR_BUFFER_BIT)
     glLoadIdentity()
     glBegin(GL_TRIANGLES)
     glVertex2f(0, 0)
-    glVertex2f(w.width, 0)
-    glVertex2f(w.width, w.height)
+    glVertex2f(win.width, 0)
+    glVertex2f(win.width, win.height)
     glEnd()
+
+    win.resources['label'].draw()
 
 
 def on_draw_2():
 
-    # TODO: label here
-
     glClear(GL_COLOR_BUFFER_BIT)
     glLoadIdentity()  # TODO: why are we loading a modelview identity here
-    glDrawArrays(GL_TRIANGLES, 0, len(resources['vertices']) // 2)
+    glDrawArrays(GL_TRIANGLES, 0, len(win.resources['vertices']) // 2)
+
+    win.resources['label'].draw()
 
 
 def init(music=False, sounds=False):
 
-    resources['window'] = win = pyglet.window.Window()
-    resources['image'] = pyglet.resource.image('pyglet.png')
-    resources['label'] = pyglet.text.Label('Hello, pyglet',
-                                           font_name='Times New Roman', font_size=36,
-                                           x=win.width // 2, y=win.height // 2,
-                                           anchor_x='center', anchor_y='center')
+    win.resources['image'] = pyglet.resource.image('pyglet.png')
+    win.resources['label'] = pyglet.text.Label('Hello, pyglet',
+                                               font_name='Times New Roman', font_size=36,
+                                               x=win.width // 2, y=win.height // 2,
+                                               anchor_x='center', anchor_y='center')
     if music:
-        resources['music'] = pyglet.resource.media('rain.mp3')
-        resources['music'].play()
+        win.resources['music'] = pyglet.resource.media('rain.mp3')
+        win.resources['music'].play()
 
     if sounds:
-        resources['sound'] = pyglet.resource.media('toot.wav', streaming=False)
+        win.resources['sound'] = pyglet.resource.media('toot.wav', streaming=False)
 
     glEnableClientState(GL_VERTEX_ARRAY)
-    resources['vertices'] = vs =  [0, 0, win.width, 0, win.width, win.height]
+    win.resources['vertices'] = vs = [100, 100, 200, 100, 200, 200]
     set_vertex_array(vs)
 
-    resources['on_draw_fun'] = on_draw_0
+    win.resources['on_draw_fun'] = on_draw_0
     return win
 
 
-@window.event
+@win.event
 def on_draw():
-    resources['on_draw_fun']()
+
+    win.resources['on_draw_fun']()
 
 
-@window.event
+@win.event
 def on_key_press(symbol, modifiers):
 
-    if 'sound' in resources:
-        resources['sound'].play()
+    if 'sound' in win.resources:
+        win.resources['sound'].play()
 
     if symbol == key.SPACE:
         print('The SPACE key was pressed.')
         draw_x = [on_draw_0, on_draw_1, on_draw_2]
-        idx = draw_x.index(resources['on_draw_fun'])
-        resources['on_draw_fun'] = draw_x[(idx + 1) % len(draw_x)]
+        idx = draw_x.index(win.resources['on_draw_fun'])
+        win.resources['on_draw_fun'] = draw_x[(idx + 1) % len(draw_x)]
+        win.resources['label'].text = win.resources['on_draw_fun'].__name__
+    else:
+        print('Some key was pressed. Try pressing SPACE.')
 
-    print('Some key was pressed.')
 
-
-@window.event
+@win.event
 def on_mouse_press(x, y, button, modifiers):
+
     if button == mouse.LEFT:
         print('The left mouse button was pressed.')
 
 
-@window.event
+@win.event
 def on_resize(width, height):
+    """
     glViewport(0, 0, width, height)
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
@@ -102,7 +105,10 @@ def on_resize(width, height):
     # gluPerspective(65, width / float(height), .1, 1000)
     glMatrixMode(GL_MODELVIEW)
     # return pyglet.event.EVENT_HANDLED
+    """
+    pass
+
 
 init()
-# window.push_handlers(pyglet.window.event.WindowEventLogger())
+# win.push_handlers(pyglet.window.event.WindowEventLogger())
 pyglet.app.run()
