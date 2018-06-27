@@ -5,10 +5,14 @@ solids = {
         "values": [1 / np.sqrt(2)],
         "iverts": [[-1, 0, -2], [1, 0, -2], [0, -1, 2], [0, 1, 2]],
         "faces": [[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]]},
+    # "hexahedron": {  # aka a cube ;)
+    #     "values": [],
+    #     "iverts": [[-1, -1, -1], [-1, -1, 1], [-1, 1, -1], [1, -1, -1], [-1, 1, 1], [1, -1, 1], [1, 1, -1], [1, 1, 1]],
+    #     "faces": [[0, 1, 4, 2], [0, 2, 6, 3], [0, 3, 5, 1], [1, 5, 7, 4], [2, 4, 7, 6], [3, 6, 7, 5]]},
     "hexahedron": {  # aka a cube ;)
         "values": [],
-        "iverts": [[-1, -1, -1], [-1, -1, 1], [-1, 1, -1], [1, -1, -1], [-1, 1, 1], [1, -1, 1], [1, 1, -1], [1, 1, 1]],
-        "faces": [[0, 1, 4, 2], [0, 2, 6, 3], [0, 3, 5, 1], [1, 5, 7, 4], [2, 4, 7, 6], [3, 6, 7, 5]]},
+        "iverts": [[-1, -1, -1], [-1, 1, -1], [1, 1, -1], [1, -1, -1], [1, -1, 1], [1, 1, 1], [-1, 1, 1], [-1, -1, 1]],
+        "faces": [[0, 1, 2, 3], [4, 3, 2, 5], [0, 3, 4, 7], [7, 4, 5, 6], [7, 6, 1, 0], [1, 6, 5, 2]]},
     "octahedron": {
         "values": [],
         "iverts": [[0, 0, 1], [1, 0, 0], [0, 1, 0], [-1, 0, 0], [0, -1, 0], [0, 0, -1]],
@@ -71,7 +75,7 @@ def subdivide(verts, triangles, subdivisions=1):
 
         verts, triangles = new_verts, new_triangles  # assignment does not affect caller variables
 
-    return verts, triangles
+    return verts, triangles if subdivisions > 0 else verts.copy(), triangles.copy()
 
 
 # --- Pyglet code below --- --- --- --- ---
@@ -92,6 +96,8 @@ def make_batch():
 
     verts = iverts_to_verts(solid['values'], solid['iverts'])
     triangles = faces_to_triangles(solid['faces'])
+    print triangles
+
     verts, triangles = subdivide(verts, triangles, subdivisions=window.subdivisions)
     edges = faces_to_edges(triangles)
 
