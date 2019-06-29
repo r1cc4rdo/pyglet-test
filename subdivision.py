@@ -1,14 +1,11 @@
 import numpy as np
+from copy import deepcopy
 
 solids = {
     "tetrahedron": {
         "values": [1 / np.sqrt(2)],
-        "iverts": [[-1, 0, -2], [1, 0, -2], [0, -1, 2], [0, 1, 2]],
+        "iverts": [[-1, 0, -2], [1, 0, -2], [0, -1, 2], [0, 1, 2]],  # sign * index into [0, 1] + values
         "faces": [[0, 1, 2], [0, 2, 3], [0, 3, 1], [1, 3, 2]]},
-    # "hexahedron": {  # aka a cube ;)
-    #     "values": [],
-    #     "iverts": [[-1, -1, -1], [-1, -1, 1], [-1, 1, -1], [1, -1, -1], [-1, 1, 1], [1, -1, 1], [1, 1, -1], [1, 1, 1]],
-    #     "faces": [[0, 1, 4, 2], [0, 2, 6, 3], [0, 3, 5, 1], [1, 5, 7, 4], [2, 4, 7, 6], [3, 6, 7, 5]]},
     "hexahedron": {  # aka a cube ;)
         "values": [],
         "iverts": [[-1, -1, -1], [-1, 1, -1], [1, 1, -1], [1, -1, -1], [1, -1, 1], [1, 1, 1], [-1, 1, 1], [-1, -1, 1]],
@@ -28,7 +25,8 @@ solids = {
 
 def iverts_to_verts(values, indexed_vertices):
     """
-    For when coordinates are made up from a discrete number of values.
+    iverts in solids are sign * index into [0, 1] + values.
+    Because in platonic solids, coordinates are made up from a discrete number of values.
     """
     values = np.array([0, 1] + values)
     verts = np.sign(indexed_vertices) * values[np.absolute(indexed_vertices)]
@@ -36,6 +34,9 @@ def iverts_to_verts(values, indexed_vertices):
 
 
 def faces_to_edges(faces):
+    """
+    Returns sorted list of edges (start, end) with start < end from a collection of arbitrary faces.
+    """
     edges = []
     for face in faces:
         edges.extend([(i, j) for i, j in zip(face, face[1:] + [face[0]])])
@@ -44,6 +45,9 @@ def faces_to_edges(faces):
 
 
 def faces_to_triangles(faces):
+    """
+    Returns list of triangles from a collection of arbitrary faces.
+    """
     return [[face[0], v1, v2] for face in faces for v1, v2 in zip(face[1:-1], face[2:])]
 
 
@@ -75,7 +79,7 @@ def subdivide(verts, triangles, subdivisions=1):
 
         verts, triangles = new_verts, new_triangles  # assignment does not affect caller variables
 
-    return verts, triangles if subdivisions > 0 else verts.copy(), triangles.copy()
+    return (verts, triangles) if subdivisions > 0 else deepcopy((verts, triangles))
 
 
 # --- Pyglet code below --- --- --- --- ---

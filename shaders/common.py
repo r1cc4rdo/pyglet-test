@@ -1,7 +1,12 @@
+from math import pi, sin, cos, sqrt
 from euclid import *
 
 import pyglet
-from pyglet import resource
+from pyglet.gl import *
+from pyglet.window import key
+from pyglet import image, resource
+
+from shader import Shader
 from objects import *
 
 window = None
@@ -14,10 +19,10 @@ def vec(*args): # create ctypes arrays of floats:
 def make_batches():
 
     batch1 = pyglet.graphics.Batch()
-    torus = Torus(1, 0.3, 80, 25, batch=batch1)
+    Torus(1, 0.3, 80, 25, batch=batch1)
 
     batch2 = pyglet.graphics.Batch()
-    sphere = Sphere(1.2, 50, batch=batch2)
+    Sphere(1.2, 50, batch=batch2)
 
     return batch1, batch2
 
